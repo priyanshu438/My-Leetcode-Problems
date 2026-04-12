@@ -1,0 +1,49 @@
+class Solution {
+
+    int[][] memo;
+
+    // Distance between two characters
+    private int dist(int a, int b) {
+        if (a == -1) return 0;
+        int x1 = a / 6, y1 = a % 6;
+        int x2 = b / 6, y2 = b % 6;
+        return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+    }
+
+    public int minimumDistance(String word) {
+        int n = word.length();
+        memo = new int[n][27]; // 26 chars + 1 for -1
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < 27; j++) {
+                memo[i][j] = -1;
+            }
+        }
+
+        return dfs(word, 0, -1);
+    }
+
+    // i = current index, otherFinger = position of second finger
+    private int dfs(String word, int i, int otherFinger) {
+        if (i == word.length()) return 0;
+
+        if (memo[i][otherFinger + 1] != -1) {
+            return memo[i][otherFinger + 1];
+        }
+
+        int curr = word.charAt(i) - 'A';
+
+        // Option 1: use same finger as previous
+        int useSame = dist(
+            i == 0 ? -1 : word.charAt(i - 1) - 'A',
+            curr
+        ) + dfs(word, i + 1, otherFinger);
+
+        // Option 2: use other finger
+        int useOther = dist(otherFinger, curr)
+                     + dfs(word, i + 1,
+                           i == 0 ? -1 : word.charAt(i - 1) - 'A');
+
+        return memo[i][otherFinger + 1] = Math.min(useSame, useOther);
+    }
+}
